@@ -2,7 +2,7 @@
 // @name         Remember me
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  try to take over the world!
+// @description  Remember my password
 // @author       seel
 // @match        http://ipgw.neu.edu.cn/srun_portal_pc.php?ac_id=1&
 // @require     http://code.jquery.com/jquery-2.1.1.min.js
