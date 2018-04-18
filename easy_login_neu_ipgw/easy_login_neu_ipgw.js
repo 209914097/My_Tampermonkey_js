@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         easy login neu ipgw
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      2.0
 // @description  轻松的登陆东北大学IP网关
 // @author       seel
 // @match        http://ipgw.neu.edu.cn/srun_portal_pc.php?ac_id=1&
@@ -11,42 +11,64 @@
 
 //方法1
 (function() {
-    var  form=document.forms.form2;
-    var user = form.username;
-    var pw = form.password;
-    var list=[201717,201108,217057,200005,10005,17001,17064,17065,17038,17048,17052,17059,17050,17064,17062,17061,17079,17087,17081,16037,10082,00148,16070,16007];
-    user.value="";
-    if( $.cookie( "keypress")==1){
+    try{
+        var  form=document.forms.form2;
+        var user = form.username;
+        var pw = form.password;
+        var list=[888,666,3742];
 
-        pw.value=user.value=list[parseInt(Math.random()*list.length)];//产生0-25包括0，但不包括25的随机整数，若list.length=25
-        //alert(pw.value);
-        form.submit();
-    }
-    user.onkeyup=function(){
+        user.value="";
+        if( $.cookie( "keypress")==1){
 
-        if(event.keyCode==32)   {
-             $.cookie( "keypress" ,  1 , { path: '/', expires: 'Session' });
             pw.value=user.value=list[parseInt(Math.random()*list.length)];//产生0-25包括0，但不包括25的随机整数，若list.length=25
             //alert(pw.value);
             form.submit();
         }
+        user.onkeyup=function(){
+
+            if(event.keyCode==32)   {
+                $.cookie( "keypress" ,  1 , { path: '/', expires: 'Session' });
+                pw.value=user.value=list[parseInt(Math.random()*list.length)];//产生0-25包括0，但不包括25的随机整数，若list.length=25
+                //alert(pw.value);
+                form.submit();
+            }
 
     };
+        //Remember someone password is the function of below part,It can be removed from this whole script//
+        var sub_bt=document.getElementsByClassName('btn btn-primary')[0];
 
-//Remember someone password is the function of below part,It can be removed from this whole script//
-var sub_bt=document.getElementsByClassName('btn btn-primary')[0];
+        function setCookie(cname,cvalue,exdays){
+            var d = new Date();
+            d.setTime(d.getTime()+(exdays*24*60*60*1000));
+            var expires = "expires="+d.toGMTString();
+            document.cookie = cname+"="+cvalue+"; "+expires;
+        }
 
-function setCookie(cname,cvalue,exdays){
-    var d = new Date();
-    d.setTime(d.getTime()+(exdays*24*60*60*1000));
-    var expires = "expires="+d.toGMTString();
-    document.cookie = cname+"="+cvalue+"; "+expires;
-}
+        sub_bt.onclick=function(){
+            setCookie(user.value,pw.value,30);
+        };
+        //Remember someone password is the function of upper part,It can be removed from this whole script//
+    }
+    catch(err){
+        //断网重连//
+        function NetPing() {
+            var Ping=function(a){this.opt=a||{},this.favicon=this.opt.favicon||"/favicon.ico",this.timeout=this.opt.timeout||0};Ping.prototype.ping=function(a,b){function c(a){d&&clearTimeout(d);var c=new Date-e;if("function"==typeof b)return"error"===a.type?(console.error("error loading resource"),b("error",c)):b(null,c)}this.img=new Image;var d,e=new Date;this.img.onload=c,this.img.onerror=c,this.timeout&&(d=setTimeout(c,this.timeout)),this.img.src=a+this.favicon+"?"+ +new Date},"undefined"!=typeof exports?"undefined"!=typeof module&&module.exports&&(module.exports=Ping):window.Ping=Ping;
 
-sub_bt.onclick=function(){
-    setCookie(user.value,pw.value,30);
-};
-//Remember someone password is the function of upper part,It can be removed from this whole script//
+            var p = new Ping();
+            p.ping("https://www.zhihu.com/", function(err, data) {
+                // Also display error if err is returned.
+                if (err) {
+                    console.log("error disconnect");
+                    self.location = 'http://ipgw.neu.edu.cn/';
+                } else {
+                    console.log('connect');
+                }
+            });
+        }
+        setInterval(NetPing, 15000);//15秒ping一次
+
+        //断网重连//
+    }
 })();
 
 
