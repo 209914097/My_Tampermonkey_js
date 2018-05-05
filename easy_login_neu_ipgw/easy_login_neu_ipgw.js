@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         easy login neu ipgw
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.5
 // @description  轻松的登陆东北大学IP网关
 // @author       seel
 // @match        http://ipgw.neu.edu.cn/srun_portal_pc.php?ac_id=1&
@@ -51,10 +51,80 @@
     }
     catch(err){
         //断网重连//
-        function NetPing() {
-            var Ping=function(a){this.opt=a||{},this.favicon=this.opt.favicon||"/favicon.ico",this.timeout=this.opt.timeout||0};Ping.prototype.ping=function(a,b){function c(a){d&&clearTimeout(d);var c=new Date-e;if("function"==typeof b)return"error"===a.type?(console.error("error loading resource"),b("error",c)):b(null,c)}this.img=new Image;var d,e=new Date;this.img.onload=c,this.img.onerror=c,this.timeout&&(d=setTimeout(c,this.timeout)),this.img.src=a+this.favicon+"?"+ +new Date},"undefined"!=typeof exports?"undefined"!=typeof module&&module.exports&&(module.exports=Ping):window.Ping=Ping;
+        function NetPing() {       
+            //-----------------------------------------分割线----------改了别人的ping.js库---------------//   
+             /**
+             * Creates a Ping instance.
+             * @returns {Ping}
+             * @constructor
+             */
+            var Ping = function(opt) {
+                this.opt = opt || {};
+                this.favicon = this.opt.favicon || "/favicon.ico";
+                this.timeout = this.opt.timeout || 0;
+            };
 
-            var p = new Ping();
+            /**
+             * Pings source and triggers a callback when completed.
+             * @param source Source of the website or server, including protocol and port.
+             * @param callback Callback function to trigger when completed. Returns error and ping value.
+             * @param timeout Optional number of milliseconds to wait before aborting.
+             */
+            Ping.prototype.ping = function(source, callback) {
+                this.img = new Image();
+                var timer;
+
+                var start = new Date();
+            //     this.img.onload = pingCheck;
+            //     this.img.onerror = pingCheck;
+                if (this.timeout) { timer = setTimeout(this.img.onload=pingCheck, this.timeout); }
+
+             /**
+             请求超时时间设置实现原理
+              setTimeout(this.img.onload=pingCheck, this.timeout)这句话很奇怪，本质上相当于执行以下2句伪代码
+              (假设this.timeout=5000)
+              (1)马上执行this.img.onload=pingCheck 故一旦出现图片onload事件，马上执行pingCheck。this.img.onload=pingCheck语句中pingCheck一直等待onload事件发生后返回的参数e出现
+              （2）延时5秒执行pingCheck 延时5秒后，无论是否发生过图片onload事件都执行pingCheck，且一旦执行就抛出console.error("error loading resource")，因为pingCheck和this.img.onload=pingCheck不同，pingCheck中参数e一直是undefined,故一旦执行就抛出console.error("error loading resource")
+              这样实际上执行了两次不同的pingCheck.
+              如果网速佳，onload事件在5秒之前就发生，伪代码(1)中pingCheck先于伪代码(2)中的pingCheck执行,
+              又因为pingCheck中if (timer) { clearTimeout(timer); }会杀死延时5秒执行的伪代码(2),所以只会看到pingCheck执行一次且马上执行无延时打印console.log('connect');
+              若网速极差或者断网，onload事件没发生，伪代码(1)中pingCheck不执行（它要等待onload事件发生返回一个参数e出现，代入自身才执行），从而if (timer) { clearTimeout(timer); }不执行，不会杀死延时5秒执行的伪代码(2)
+              5秒后onload事件仍没发生，伪代码(2)中pingCheck执行，因为参数 e永远是undefined 会抛出console.error("error loading resource");
+              故此，会看到等待5秒后，若网络仍没连上，则会抛出console.error("error loading resource");的现象
+              看起来就像超时请求设为5秒一样
+              验证上述理论：
+              删掉if (timer) { clearTimeout(timer); }
+              这样在网络佳时，会输出'connect'5秒后输出"error loading resource"
+
+             **/
+                /**
+                 * Times ping and triggers callback.     
+                 */   
+                function pingCheck(e) {
+                    if (timer) { clearTimeout(timer); }
+                    var pong = new Date() - start;
+
+                    if (typeof callback === "function") {
+                        if (e==undefined) {
+                            console.error("error loading resource");
+                            return callback("error", pong);
+                        }
+                        return callback(null, pong);
+                    }
+                }
+
+                this.img.src = source + this.favicon + "?" + (+new Date()); // Trigger image load with cache buster
+            };
+
+            if (typeof exports !== "undefined") {
+                if (typeof module !== "undefined" && module.exports) {
+                    module.exports = Ping;
+                }
+            } else {
+                window.Ping = Ping;
+            }      
+            //-----------------------------------------分割线----------改了别人的ping.js库---------------// 
+            var p = new Ping({'timeout':5000});//设置请求超时为5秒
             p.ping("https://www.zhihu.com/", function(err, data) {
                 // Also display error if err is returned.
                 if (err) {
