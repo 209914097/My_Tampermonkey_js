@@ -7,6 +7,7 @@
 // @match        http://219.216.96.73/pyxx/login.aspx
 // @match        http://ipgw.neu.edu.cn/srun_portal_pc.php?ac_id=1&
 // @match        https://pan.baidu.com/
+// @match        http://bt.neu6.edu.cn/*
 // @grant        none
 // ==/UserScript==
 
