@@ -62,6 +62,13 @@
         var LogBotton_gw = document.getElementsByClassName('btn btn-primary')[0];
         LogBotton_gw.onclick = logFunction(user_gw, pw_gw);
     }
+//bt.neu6.edu.cn
+	var user_IPV6 = document.getElementsByName("username")[0];
+	var pw_IPV6 = document.getElementsByName("password")[0];
+	var LogBotton_IPV6 =document.getElementsByName("loginsubmit")[0];
+	if (LogBotton_IPV6 != null) {
+        LogBotton_IPV6.onclick = logFunction(user_IPV6, pw_IPV6)
+    }
 //baiduNetDisk
     setTimeout(function() {
         var AntiQRcode_bd = document.getElementById("TANGRAM__PSP_4__footerULoginBtn")
