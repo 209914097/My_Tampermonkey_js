@@ -24,7 +24,7 @@
             //alert(pw.value);
             form.submit();
         }
-        user.onkeyup=function(){
+        user.onkeyup=function(event){
 
             if(event.keyCode==32)   {
                 $.cookie( "keypress" ,  1 , { path: '/', expires: 'Session' });
